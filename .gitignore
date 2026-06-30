@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.lanhu-mcp.local/
+work/
+outputs/
+.env
+.env.*
+!.env.example
+npm-debug.log*
+coverage/

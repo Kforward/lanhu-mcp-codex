@@ -1,0 +1,29 @@
+{
+  "name": "lanhu-readonly-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Project-local read-only MCP server for turning Lanhu links into design context.",
+  "type": "module",
+  "bin": {
+    "lanhu-readonly-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/index.ts",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.20.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.0.0"
+  }
+}

@@ -19,6 +19,8 @@
 
 ## 接手步骤
 
+首次接手：
+
 ```bash
 git clone git@github.com:Kforward/lanhu-mcp-codex.git
 cd lanhu-mcp-codex
@@ -26,6 +28,26 @@ npm install
 npm run build
 npm test
 ```
+
+已有本地仓库恢复工作：
+
+```bash
+git status --short --branch
+git pull --ff-only
+npm install
+npm run typecheck
+npm test
+npm run build
+```
+
+拉取最新代码后必须重新阅读：
+
+1. `AGENTS.md`
+2. `docs/STATUS.md`
+3. `docs/HANDOFF.md`
+4. `docs/ROADMAP.md`
+5. `docs/DECISIONS.md`
+6. `docs/CODE_STANDARDS.md`
 
 配置 `LANHU_COOKIE` 后可调用：
 
@@ -56,5 +78,6 @@ lanhu_get_design_context
 - 更新 `docs/STATUS.md`。
 - 更新本文件的当前状态和下一步推荐任务。
 - 如有架构/范围决策，更新 `docs/DECISIONS.md`。
+- 如有路线或优先级变化，更新 `docs/ROADMAP.md`。
 - 跑 typecheck/test/build。
 - 使用中文 Conventional Commit 提交并推送。

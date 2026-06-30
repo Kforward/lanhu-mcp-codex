@@ -21,6 +21,15 @@ git status --short --branch
 git log --oneline -5
 ```
 
+## 恢复工作流程
+
+每次开始新任务、切换客户端、切换 Agent、或执行 `git pull` 获取他人最新提交后，必须重新建立项目上下文：
+
+1. 执行 `git pull --ff-only` 获取远程最新内容；如果已有本地未提交改动，先读 `git status --short --branch` 并保护本地改动，不要强行覆盖。
+2. 重新阅读 `docs/STATUS.md`、`docs/HANDOFF.md`、`docs/ROADMAP.md`、`docs/DECISIONS.md`。
+3. 对照最近 5 条 commit，确认文档描述和 git 历史一致。
+4. 在继续开发前，先用简短中文总结当前状态、最新变化、下一步最小任务。
+
 ## 开发原则
 
 - 默认使用中文沟通和中文文档。
@@ -45,10 +54,11 @@ git log --oneline -5
 1. 跑 `npm run typecheck`。
 2. 跑 `npm test`。
 3. 跑 `npm run build`。
-4. 更新 `docs/STATUS.md`。
-5. 更新 `docs/HANDOFF.md`。
+4. 更新 `docs/STATUS.md`，写清楚已完成、当前状态、下一步。
+5. 更新 `docs/HANDOFF.md`，写清楚接手步骤、已验证命令、已知风险、下一步推荐任务。
 6. 如果新增/改变架构决策，更新 `docs/DECISIONS.md`。
-7. 使用中文 Conventional Commits 提交。
+7. 如果改变路线或优先级，更新 `docs/ROADMAP.md`。
+8. 使用中文 Conventional Commits 提交并推送。
 
 推荐提交格式：
 

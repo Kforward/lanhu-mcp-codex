@@ -79,6 +79,19 @@ LANHU_COOKIE = "your_lanhu_cookie"
 - 如果变更影响路线或架构，更新 `docs/ROADMAP.md` 或 `docs/DECISIONS.md`。
 - 使用中文 Conventional Commits 提交，例如 `feat: 增强蓝湖画板规范化逻辑`。
 
+已有本地仓库恢复工作时：
+
+```bash
+git status --short --branch
+git pull --ff-only
+npm install
+npm run typecheck
+npm test
+npm run build
+```
+
+拉取后重新阅读 `AGENTS.md`、`docs/STATUS.md`、`docs/HANDOFF.md`、`docs/ROADMAP.md`、`docs/DECISIONS.md`，再继续开发。
+
 ## 安全边界
 
 - 不提交真实 Cookie、Token、账号信息。

@@ -2,6 +2,8 @@
 
 蓝湖只读 MCP 服务，用于把蓝湖项目/设计稿链接转换成 Codex 或其他 AI Agent 可消费的设计上下文。
 
+项目第一原则：辅助 Codex 基于蓝湖设计文稿进行代码还原。
+
 ## 当前能力
 
 - 解析蓝湖链接中的 `pid`、`tid`、`image_id`、`docType` 等参数。
@@ -77,6 +79,7 @@ LANHU_COOKIE = "your_lanhu_cookie"
 - 跑 `npm run typecheck`、`npm test`、`npm run build`。
 - 更新 `docs/STATUS.md` 和 `docs/HANDOFF.md`。
 - 如果变更影响路线或架构，更新 `docs/ROADMAP.md` 或 `docs/DECISIONS.md`。
+- 如果出现新的建议，先按项目第一原则评估；不冲突且能提升蓝湖读取、设计理解、资源准备、还原质量或协作效率的建议，写入对应文档。
 - 使用中文 Conventional Commits 提交，例如 `feat: 增强蓝湖画板规范化逻辑`。
 
 已有本地仓库恢复工作时：

@@ -38,6 +38,8 @@ git log --oneline -5
 - 做 review 时优先指出 bug、风险和测试缺口。
 - 如果任务不明确，先做合理假设，不要一直反问。
 - 在 Windows PowerShell 中读取/搜索文本时显式使用 UTF-8，例如 `Get-Content -Encoding UTF8`、`Select-String -Encoding UTF8`。
+- 项目第一原则是“辅助 Codex 基于蓝湖设计文稿进行代码还原”。任何新建议、路线变化或功能扩展，都必须先按这一原则评估。
+- 若新建议不违背第一原则且能提升读取、理解、资源准备、还原质量或协作效率，必须补充进 `docs/ROADMAP.md`、`docs/HANDOFF.md`、`docs/DECISIONS.md` 或 `docs/STATUS.md` 的合适位置。
 
 ## 代码约束
 
@@ -58,7 +60,8 @@ git log --oneline -5
 5. 更新 `docs/HANDOFF.md`，写清楚接手步骤、已验证命令、已知风险、下一步推荐任务。
 6. 如果新增/改变架构决策，更新 `docs/DECISIONS.md`。
 7. 如果改变路线或优先级，更新 `docs/ROADMAP.md`。
-8. 使用中文 Conventional Commits 提交并推送。
+8. 如果过程中出现新的有效建议，按第一原则评估后沉淀进文档。
+9. 使用中文 Conventional Commits 提交并推送。
 
 推荐提交格式：
 

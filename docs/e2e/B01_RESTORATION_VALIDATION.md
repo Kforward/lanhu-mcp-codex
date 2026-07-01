@@ -11,6 +11,7 @@
 - 生成时间：2026-07-01。
 - 生成结果：项目 `3.3.1落地页`，读取到 8 个画板，下载 8 张缩略图。
 - 目标画板：`B01留资页-用户未登录（有搜索词）`。
+- 更准确的 B01 画板直链：`https://lanhuapp.com/web/#/item/project/detailDetach?type=image&pid=f5fffc2a-680a-4298-8f51-f1573a87eaa0&teamId=43efda02-ce73-4682-acd1-afc75cbf6b0c&project_id=f5fffc2a-680a-4298-8f51-f1573a87eaa0&image_id=ec806cda-67ac-4f8b-98ca-86ac19ffa280&fromEditor=true`。
 - 本地验证页：`work/e2e-b01-playground/`，该目录被 `.gitignore` 忽略，不提交蓝湖缩略图或还原页面资产。
 
 ## 验证过程
@@ -43,6 +44,7 @@
 - 缺少切图资源，律师人物图、头像、分类图标、底部图标只能用 CSS 占位或从整页缩略图裁剪，无法形成干净可复用资产。
 - 缺少资源语义分类，无法区分 `hero人物图`、`助手头像`、`用户头像`、`分类图标`、`底部快捷入口图标` 等。
 - 当前 `docType=axure` 只返回 warning，尚未解析 Axure/PRD 中可能存在的流程或交互说明。
+- 真实业务中可能只需要还原整张设计图中的一个组件，当前 MCP 还缺少 `targetRegion`、`targetDescription` 或 `targetLayerId` 这类组件级聚焦能力。
 
 ## 下一步建议
 
@@ -50,6 +52,7 @@
 
 1. 增加 context schema/capability 信息，让 Agent 能判断当前 MCP 产物是否包含 `restoration`，并在 MCP 更新后提示需要重启服务。
 2. 为 `lanhu_get_design_context` 增加目标画板聚焦能力，例如 `targetImageId` 或 `targetImageName`，支持在 Axure 文档链接下明确选择 B01。
-3. 在 `context.json` 中记录下载图片真实像素尺寸、API 尺寸和推断缩放比例。
-4. 扩展单图详情 API 探查，优先寻找图层、文本、标注和切图入口。
-5. 后续再推进切图资源、Design Tokens 和可复制还原 Prompt。
+3. 为组件级还原增加目标区域或目标描述，例如 `targetRegion`、`targetDescription`，后续如有图层数据再升级到 `targetLayerId`。
+4. 在 `context.json` 中记录下载图片真实像素尺寸、API 尺寸和推断缩放比例。
+5. 扩展单图详情 API 探查，优先寻找图层、文本、标注和切图入口。
+6. 后续再推进切图资源、Design Tokens 和可复制还原 Prompt。

@@ -64,10 +64,12 @@ lanhu_get_design_context
 ## 下一步推荐任务
 
 1. 实现 V1.1.1 上下文可消费性补强：schema/capability 信息、MCP 重启提示、目标画板聚焦、图片真实尺寸和缩放比例。
-2. 给上述能力补测试，确保 `context.md/json` 能明确暴露还原上下文能力。
-3. 推进 V1.2 单图详情增强，研究 `image_id` 单图详情 API 的更多字段。
-4. 给蓝湖真实响应建立脱敏 fixture，扩展规范化测试。
-5. 根据单图详情结果继续评估切图资源、Design Tokens 或还原提示词。
+2. 补充组件级还原聚焦能力设计，至少支持 `targetDescription` 或 `targetRegion`，用于“整图里只实现一个小组件”的场景。
+3. 给上述能力补测试，确保 `context.md/json` 能明确暴露还原上下文能力。
+4. 使用 B01 画板直链重新验收：`detailDetach?type=image&...&image_id=ec806cda-67ac-4f8b-98ca-86ac19ffa280`。
+5. 推进 V1.2 单图详情增强，研究 `image_id` 单图详情 API 的更多字段。
+6. 给蓝湖真实响应建立脱敏 fixture，扩展规范化测试。
+7. 根据单图详情结果继续评估切图资源、Design Tokens 或还原提示词。
 
 ## 已知风险
 

@@ -72,8 +72,9 @@
 - 在 `context.json` 和工具返回摘要中增加 schema/capability 信息，明确是否包含 `restoration`。
 - 在文档或工具返回中提示 MCP 代码更新后需要重启服务，避免长进程继续使用旧构建。
 - 为 `lanhu_get_design_context` 增加目标画板聚焦参数，例如 `targetImageId` 或 `targetImageName`。
+- 为组件级还原预留目标区域参数，例如 `targetRegion` 或 `targetDescription`，支持“整张设计图里只实现一个组件”的真实业务场景。
 - 记录下载图片真实像素尺寸、API 画板尺寸和推断缩放比例。
-- 增加测试覆盖：context schema、目标画板聚焦、图片尺寸映射。
+- 增加测试覆盖：context schema、目标画板聚焦、组件目标描述、图片尺寸映射。
 
 ## V1.2：单图详情增强
 
@@ -82,6 +83,7 @@
 - 扩展 `lanhu_get_design_context` 的 selected image 输出。
 - 优先下载当前设计图预览。
 - 如果接口返回图层或标注字段，进行只读规范化。
+- 如果后续接口能返回图层或坐标，支持 `targetLayerId` 或 `targetRegion` 生成组件级上下文。
 - 增加单图详情测试 fixture。
 
 ## V1.3：切图资源下载

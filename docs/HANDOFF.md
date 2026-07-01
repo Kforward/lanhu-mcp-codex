@@ -78,6 +78,7 @@ lanhu_get_design_context
 - `LANHU_COOKIE` 过期会导致 403/418，需要重新获取。
 - PowerShell 5.1 读取无 BOM UTF-8 时可能乱码，读取中文文件请显式 `-Encoding UTF8`。
 - Codex MCP 长进程可能在代码更新后继续使用旧构建；如果生成的 context 缺少预期字段，先重启 MCP/Codex 再验收。
+- Codex MCP 子进程不一定继承外部环境变量；推荐使用 `config.toml` 中的 PowerShell wrapper 从用户/系统环境读取 `LANHU_COOKIE`，并在修改配置或环境变量后重启 Codex。
 
 ## 阶段结束清单
 

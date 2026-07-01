@@ -34,17 +34,23 @@ node dist/index.js
 
 ## Codex MCP 配置示例
 
-将路径替换为本机仓库绝对路径：
+推荐把 `LANHU_COOKIE` 设置为 Windows 用户环境变量，不把 Cookie 明文写入 `config.toml`：
+
+```powershell
+setx LANHU_COOKIE "从蓝湖请求中复制的 Cookie 请求头"
+```
+
+将路径替换为本机仓库绝对路径。下面的 wrapper 会在 MCP 启动时从用户/系统环境变量读取 `LANHU_COOKIE`：
 
 ```toml
 [mcp_servers.lanhu-readonly]
 type = "stdio"
-command = "node"
-args = ["C:\\path\\to\\lanhu-mcp-codex\\dist\\index.js"]
-
-[mcp_servers.lanhu-readonly.env]
-LANHU_COOKIE = "your_lanhu_cookie"
+cwd = "C:\\path\\to\\lanhu-mcp-codex"
+command = "powershell"
+args = ["-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "$cookie = [Environment]::GetEnvironmentVariable('LANHU_COOKIE', 'User'); if ([string]::IsNullOrWhiteSpace($cookie)) { $cookie = [Environment]::GetEnvironmentVariable('LANHU_COOKIE', 'Machine') }; $env:LANHU_COOKIE = $cookie; & node dist/index.js"]
 ```
+
+修改 MCP 配置或用户环境变量后，需要重启 Codex 桌面端。
 
 ## MCP 工具
 

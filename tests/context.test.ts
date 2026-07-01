@@ -67,11 +67,20 @@ describe("generateDesignContext", () => {
 
     const contextJson = JSON.parse(await readFile(result.contextJsonPath, "utf8")) as {
       images: Array<{ localImagePath?: string }>;
+      restoration: {
+        pages: Array<{ role: string; implementationHint: string }>;
+        implementationGuide: { recommendedOrder: string[] };
+      };
     };
     const contextMarkdown = await readFile(result.contextMarkdownPath, "utf8");
 
     expect(contextJson.images[0]?.localImagePath).toMatch(/\.webp$/);
+    expect(contextJson.restoration.pages[0]?.role).toBe("lead_capture");
+    expect(contextJson.restoration.implementationGuide.recommendedOrder).toEqual(["img-1", "img-2"]);
     expect(contextMarkdown).toContain("# 3.3.1落地页");
+    expect(contextMarkdown).toContain("## 代码还原目标");
+    expect(contextMarkdown).toContain("## 页面角色推断");
+    expect(contextMarkdown).toContain("## 推荐实现顺序");
     expect(contextMarkdown).toContain("B01 留资页");
   });
 });

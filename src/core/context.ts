@@ -1,4 +1,5 @@
 import type { LanhuHttpClient } from "./http.js";
+import { buildRestorationContext } from "./restoration.js";
 import {
   createRunArtifacts,
   downloadImageAssets,
@@ -49,16 +50,24 @@ export async function generateDesignContext(options: {
   warnings.push(...downloads.warnings);
 
   const localPathByImageId = new Map(downloads.images.map((image) => [image.imageId, image.path]));
+  const imagesWithLocalPaths = options.images.map((image) => ({
+    ...image,
+    localImagePath: localPathByImageId.get(image.id)
+  }));
+  const restoration = buildRestorationContext({
+    parsed: options.parsed,
+    selectedImage: options.selectedImage,
+    images: imagesWithLocalPaths,
+    downloadedImages: downloads.images
+  });
   const context: DesignContext = {
     generatedAt: new Date().toISOString(),
     sourceUrl: options.sourceUrl,
     parsed: options.parsed,
     project: options.project,
     selectedImage: options.selectedImage,
-    images: options.images.map((image) => ({
-      ...image,
-      localImagePath: localPathByImageId.get(image.id)
-    })),
+    images: imagesWithLocalPaths,
+    restoration,
     artifacts,
     warnings
   };
@@ -85,9 +94,18 @@ export function renderContextMarkdown(context: DesignContext): string {
   const selectedImageLine = context.selectedImage
     ? `- 当前设计图：${context.selectedImage.name ?? context.selectedImage.id ?? context.parsed.imageId ?? "未知"}`
     : "- 当前设计图：未指定";
+  const guide = context.restoration.implementationGuide;
 
   return [
     `# ${title}`,
+    "",
+    "## 代码还原目标",
+    "",
+    guide.purpose,
+    "",
+    "### Codex 实现指引",
+    "",
+    guide.codexInstructions.map((instruction) => `- ${instruction}`).join("\n"),
     "",
     "## 基本信息",
     "",
@@ -105,6 +123,38 @@ export function renderContextMarkdown(context: DesignContext): string {
       ? "未从蓝湖接口读取到画板。"
       : context.images.map((image, index) => renderImageLine(image, index)).join("\n"),
     "",
+    "## 页面角色推断",
+    "",
+    context.restoration.pages.length === 0
+      ? "暂无可推断页面。"
+      : context.restoration.pages.map((page, index) => renderRestorationPageLine(page, index)).join("\n"),
+    "",
+    "## 推荐实现顺序",
+    "",
+    renderRecommendedOrder(context),
+    "",
+    "## 页面流程推断",
+    "",
+    context.restoration.implementationGuide.pageFlows.length === 0
+      ? "暂无可推断流程。"
+      : context.restoration.implementationGuide.pageFlows.map(renderFlow).join("\n"),
+    "",
+    "## 本地资源清单",
+    "",
+    context.restoration.assets.length === 0
+      ? "暂无本地资源。"
+      : context.restoration.assets.map((asset, index) => `${index + 1}. ${asset.imageName}：${asset.localPath}`).join("\n"),
+    "",
+    "## 推断假设与限制",
+    "",
+    "### 假设",
+    "",
+    guide.assumptions.map((assumption) => `- ${assumption}`).join("\n"),
+    "",
+    "### 限制",
+    "",
+    guide.limitations.map((limitation) => `- ${limitation}`).join("\n"),
+    "",
     "## 本地产物",
     "",
     `- context.json：${context.artifacts.contextJsonPath}`,
@@ -121,4 +171,27 @@ function renderImageLine(image: LanhuProjectImage & { localImagePath?: string },
   const size = image.width || image.height ? `${image.width ?? "?"}x${image.height ?? "?"}` : "尺寸未知";
   const local = image.localImagePath ? `，本地缩略图：${image.localImagePath}` : "";
   return `${index + 1}. ${image.name} (${image.id})，${size}${local}`;
+}
+
+function renderRestorationPageLine(
+  page: DesignContext["restoration"]["pages"][number],
+  index: number
+): string {
+  const selected = page.isSelected ? "，当前选中" : "";
+  return `${index + 1}. ${page.name} (${page.role}${selected})：${page.implementationHint}`;
+}
+
+function renderRecommendedOrder(context: DesignContext): string {
+  const byId = new Map(context.restoration.pages.map((page) => [page.id, page]));
+  const lines = context.restoration.implementationGuide.recommendedOrder
+    .map((id, index) => {
+      const page = byId.get(id);
+      return page ? `${index + 1}. ${page.name} (${page.role})` : `${index + 1}. ${id}`;
+    });
+
+  return lines.length > 0 ? lines.join("\n") : "暂无推荐顺序。";
+}
+
+function renderFlow(flow: DesignContext["restoration"]["implementationGuide"]["pageFlows"][number]): string {
+  return `- ${flow.summary} 置信度：${flow.confidence}。页面 ID：${flow.orderedPageIds.join(" -> ")}`;
 }

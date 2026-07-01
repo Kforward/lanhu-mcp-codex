@@ -53,6 +53,63 @@ export interface DownloadedImage {
   contentType?: string;
 }
 
+export type RestorationPageRole =
+  | "lead_capture"
+  | "payment"
+  | "loading"
+  | "asset_sheet"
+  | "prototype_or_prd"
+  | "unknown";
+
+export interface LocalAsset {
+  imageId: string;
+  imageName: string;
+  sourceUrl: string;
+  localPath: string;
+  contentType?: string;
+  usage: "board_preview";
+}
+
+export interface RestorationPage {
+  id: string;
+  name: string;
+  role: RestorationPageRole;
+  roleReason: string;
+  implementationHint: string;
+  apiSize?: {
+    width?: number;
+    height?: number;
+  };
+  position?: {
+    x?: number;
+    y?: number;
+  };
+  thumbnailUrl?: string;
+  localImagePath?: string;
+  isSelected: boolean;
+}
+
+export interface PageFlow {
+  summary: string;
+  orderedPageIds: string[];
+  confidence: "low" | "medium" | "high";
+}
+
+export interface ImplementationGuide {
+  purpose: string;
+  recommendedOrder: string[];
+  pageFlows: PageFlow[];
+  codexInstructions: string[];
+  assumptions: string[];
+  limitations: string[];
+}
+
+export interface RestorationContext {
+  pages: RestorationPage[];
+  assets: LocalAsset[];
+  implementationGuide: ImplementationGuide;
+}
+
 export interface DesignContext {
   generatedAt: string;
   sourceUrl: string;
@@ -60,6 +117,7 @@ export interface DesignContext {
   project?: LanhuProjectInfo;
   selectedImage?: LanhuImageDetail;
   images: Array<LanhuProjectImage & { localImagePath?: string }>;
+  restoration: RestorationContext;
   artifacts: {
     runDirectory: string;
     contextJsonPath: string;

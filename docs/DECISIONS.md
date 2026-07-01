@@ -58,3 +58,19 @@
 
 - 每个阶段必须更新 `STATUS`、`HANDOFF`，必要时更新 `ROADMAP` 和 `DECISIONS`。
 - 新 Agent 必须先读 `AGENTS.md` 和 docs 后再开发。
+
+## 2026-07-01：V1.1 优先建设代码还原上下文
+
+决定：下一阶段优先把 `context.md/context.json` 从画板清单升级为辅助 Codex 还原代码的实现上下文。
+
+原因：
+
+- 项目核心目标是辅助 Codex 根据蓝湖设计文稿进行页面/组件代码还原。
+- V1 已证明 API-only 读取链路可行，但输出还不足以指导高质量实现。
+- 在尚未获得完整图层树、切图和 Design Tokens 前，可以先通过画板名称、资源路径和轻量规则生成页面角色、流程关系和实现建议。
+
+影响：
+
+- 新增 `src/core/restoration.ts` 作为还原推断层，避免把推断逻辑散落在 MCP 工具层或 Markdown 渲染层。
+- `context.json` 新增 `restoration` 结构，后续单图详情、切图和 tokens 都应接入该结构或其后续扩展。
+- 页面角色和流程推断必须明确标注为轻量推断，不得伪装成蓝湖官方结构化图层数据。

@@ -49,6 +49,12 @@ export function registerGetDesignContextTool(server: McpServer): void {
           images: projectImages.images,
           outputDir: args.outputDir,
           includeImages: args.includeImages ?? true,
+          request: {
+            targetImageId: args.targetImageId,
+            targetImageName: args.targetImageName,
+            targetDescription: args.targetDescription,
+            targetRegion: args.targetRegion
+          },
           http
         });
 

@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { LanhuHttpClient } from "./http.js";
+import { readImageSize } from "./image-metadata.js";
 import type { DownloadedImage, LanhuProjectImage } from "../types.js";
 
 export interface RunArtifacts {
@@ -70,7 +71,9 @@ export async function downloadImageAssets(options: {
         imageName: image.name,
         sourceUrl: image.thumbnailUrl,
         path: filePath,
-        contentType: response.contentType
+        contentType: response.contentType,
+        fileSizeBytes: response.bytes.length,
+        pixelSize: readImageSize(response.bytes, response.contentType, image.thumbnailUrl)
       });
     } catch (error) {
       warnings.push(`画板 "${image.name}" 缩略图下载失败：${error instanceof Error ? error.message : String(error)}`);

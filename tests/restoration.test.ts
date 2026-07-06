@@ -63,4 +63,49 @@ describe("buildRestorationContext", () => {
 
     expect(context.implementationGuide.recommendedOrder).toEqual(["b01", "b02"]);
   });
+
+  it("selects a target board and records component-level restoration intent", () => {
+    const parsed: LanhuParsedUrl = {
+      originalUrl: "https://lanhuapp.com/web/#/item/project/detailDetach?pid=p1&tid=t1&image_id=axure-doc",
+      route: "/item/project/detailDetach",
+      pid: "p1",
+      tid: "t1",
+      imageId: "axure-doc",
+      rawQuery: {
+        pid: "p1",
+        tid: "t1",
+        image_id: "axure-doc"
+      }
+    };
+
+    const context = buildRestorationContext({
+      parsed,
+      images: [
+        { id: "b01", name: "B01留资页-用户未登录（有搜索词）", raw: {} },
+        { id: "b03", name: "B03 支付页-默认无底部内容", raw: {} }
+      ],
+      downloadedImages: [],
+      request: {
+        targetImageName: "有搜索词",
+        targetDescription: "只实现底部聊天输入栏组件",
+        targetRegion: {
+          x: 0,
+          y: 650,
+          width: 375,
+          height: 98,
+          coordinateSpace: "api"
+        }
+      }
+    });
+
+    expect(context.targetFocus).toMatchObject({
+      selectedImageId: "b01",
+      selectedImageName: "B01留资页-用户未登录（有搜索词）",
+      selectedPageRole: "lead_capture",
+      source: "explicit-image-name"
+    });
+    expect(context.targetFocus.component?.instruction).toContain("组件级还原目标");
+    expect(context.pages.find((page) => page.id === "b01")?.isSelected).toBe(true);
+    expect(context.implementationGuide.businessImplementationChecklist[0]).toContain("组件级任务");
+  });
 });

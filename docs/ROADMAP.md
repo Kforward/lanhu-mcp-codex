@@ -69,12 +69,15 @@
 
 目标：先解决 E2E 暴露出的“Agent 如何稳定消费最新 context”问题，再进入更重的 API 能力探查。
 
-- 在 `context.json` 和工具返回摘要中增加 schema/capability 信息，明确是否包含 `restoration`。
-- 在文档或工具返回中提示 MCP 代码更新后需要重启服务，避免长进程继续使用旧构建。
-- 为 `lanhu_get_design_context` 增加目标画板聚焦参数，例如 `targetImageId` 或 `targetImageName`。
-- 为组件级还原预留目标区域参数，例如 `targetRegion` 或 `targetDescription`，支持“整张设计图里只实现一个组件”的真实业务场景。
-- 记录下载图片真实像素尺寸、API 画板尺寸和推断缩放比例。
-- 增加测试覆盖：context schema、目标画板聚焦、组件目标描述、图片尺寸映射。
+状态：已完成代码实现、单测和真实 B01 画板直链验收。
+
+- 已在 `context.json` 和工具返回摘要中增加 schema/capability 信息，明确是否包含 `restoration`。
+- 已在 context schema 中提示 MCP 代码更新、build 或环境变量变化后需要重启服务，避免长进程继续使用旧构建。
+- 已为 `lanhu_get_design_context` 增加目标画板聚焦参数：`targetImageId`、`targetImageName`。
+- 已为组件级还原增加目标参数：`targetRegion`、`targetDescription`，支持“整张设计图里只实现一个组件”的真实业务场景。
+- 已记录下载图片真实像素尺寸、API 画板尺寸和推断缩放比例。
+- 已增加测试覆盖：context schema、目标画板聚焦、组件目标描述、图片尺寸映射和图片尺寸解析。
+- 已验收：用真实 B01 画板直链生成 context，确认 `targetFocus`、`localImage.pixelSize`、`apiToPixelScale` 和业务落地检查清单已出现在真实产物中；本次真实验收读取 8 个画板、下载 8 张缩略图、warning 数量为 0。
 
 ## V1.2：单图详情增强
 

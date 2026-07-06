@@ -6,8 +6,11 @@ import {
   writeJsonFile,
   writeTextFile
 } from "./artifacts.js";
+import { buildLocalImageInfo } from "./image-assets.js";
 import type {
+  ContextSchemaInfo,
   DesignContext,
+  DesignContextRequest,
   DesignContextResult,
   LanhuImageDetail,
   LanhuParsedUrl,
@@ -23,6 +26,7 @@ export async function generateDesignContext(options: {
   images: LanhuProjectImage[];
   outputDir?: string;
   includeImages: boolean;
+  request?: DesignContextRequest;
   http: LanhuHttpClient;
 }): Promise<DesignContextResult> {
   if (!options.parsed.pid) {
@@ -50,20 +54,28 @@ export async function generateDesignContext(options: {
   warnings.push(...downloads.warnings);
 
   const localPathByImageId = new Map(downloads.images.map((image) => [image.imageId, image.path]));
+  const downloadedByImageId = new Map(downloads.images.map((image) => [image.imageId, image]));
   const imagesWithLocalPaths = options.images.map((image) => ({
     ...image,
-    localImagePath: localPathByImageId.get(image.id)
+    localImagePath: localPathByImageId.get(image.id),
+    localImage: buildLocalImageInfo(image, downloadedByImageId.get(image.id))
   }));
   const restoration = buildRestorationContext({
     parsed: options.parsed,
     selectedImage: options.selectedImage,
     images: imagesWithLocalPaths,
-    downloadedImages: downloads.images
+    downloadedImages: downloads.images,
+    request: options.request
   });
+  warnings.push(...restoration.targetFocus.warnings);
+
+  const schema = buildContextSchema();
   const context: DesignContext = {
+    schema,
     generatedAt: new Date().toISOString(),
     sourceUrl: options.sourceUrl,
     parsed: options.parsed,
+    request: options.request ?? {},
     project: options.project,
     selectedImage: options.selectedImage,
     images: imagesWithLocalPaths,
@@ -80,7 +92,10 @@ export async function generateDesignContext(options: {
       projectTitle: options.project?.title,
       imageCount: options.images.length,
       downloadedImageCount: downloads.images.length,
-      warningCount: warnings.length
+      warningCount: warnings.length,
+      schemaVersion: schema.schemaVersion,
+      selectedImageId: restoration.targetFocus.selectedImageId,
+      selectedImageName: restoration.targetFocus.selectedImageName
     },
     contextJsonPath: artifacts.contextJsonPath,
     contextMarkdownPath: artifacts.contextMarkdownPath,
@@ -91,13 +106,21 @@ export async function generateDesignContext(options: {
 
 export function renderContextMarkdown(context: DesignContext): string {
   const title = context.project?.title ?? "蓝湖设计上下文";
-  const selectedImageLine = context.selectedImage
-    ? `- 当前设计图：${context.selectedImage.name ?? context.selectedImage.id ?? context.parsed.imageId ?? "未知"}`
-    : "- 当前设计图：未指定";
+  const selectedImageLine = context.restoration.targetFocus.selectedImageName
+    ? `- 当前目标画板：${context.restoration.targetFocus.selectedImageName} (${context.restoration.targetFocus.selectedImageId ?? "未知 ID"})`
+    : context.selectedImage
+      ? `- 当前设计图：${context.selectedImage.name ?? context.selectedImage.id ?? context.parsed.imageId ?? "未知"}`
+      : "- 当前目标画板：未指定";
   const guide = context.restoration.implementationGuide;
 
   return [
     `# ${title}`,
+    "",
+    "## Context Schema",
+    "",
+    `- schemaVersion：${context.schema.schemaVersion}`,
+    `- capabilities：${renderCapabilities(context.schema)}`,
+    `- restartHint：${context.schema.restartHint}`,
     "",
     "## 代码还原目标",
     "",
@@ -106,6 +129,10 @@ export function renderContextMarkdown(context: DesignContext): string {
     "### Codex 实现指引",
     "",
     guide.codexInstructions.map((instruction) => `- ${instruction}`).join("\n"),
+    "",
+    "### 业务落地检查清单",
+    "",
+    guide.businessImplementationChecklist.map((item) => `- ${item}`).join("\n"),
     "",
     "## 基本信息",
     "",
@@ -116,6 +143,11 @@ export function renderContextMarkdown(context: DesignContext): string {
     `- 团队 ID：${context.parsed.tid ?? "未知"}`,
     selectedImageLine,
     `- 文档类型：${context.parsed.docType ?? "未提供"}`,
+    `- 目标来源：${context.restoration.targetFocus.source}`,
+    "",
+    "## 目标聚焦",
+    "",
+    renderTargetFocus(context),
     "",
     "## 画板列表",
     "",
@@ -167,10 +199,15 @@ export function renderContextMarkdown(context: DesignContext): string {
   ].join("\n");
 }
 
-function renderImageLine(image: LanhuProjectImage & { localImagePath?: string }, index: number): string {
+function renderImageLine(image: DesignContext["images"][number], index: number): string {
   const size = image.width || image.height ? `${image.width ?? "?"}x${image.height ?? "?"}` : "尺寸未知";
+  const localImage = image.localImage;
+  const pixel = localImage?.pixelSize ? `，本地像素：${localImage.pixelSize.width}x${localImage.pixelSize.height}` : "";
+  const scale = localImage?.apiToPixelScale
+    ? `，API 到像素倍率：${localImage.apiToPixelScale.x ?? "?"}x${localImage.apiToPixelScale.y ?? "?"}`
+    : "";
   const local = image.localImagePath ? `，本地缩略图：${image.localImagePath}` : "";
-  return `${index + 1}. ${image.name} (${image.id})，${size}${local}`;
+  return `${index + 1}. ${image.name} (${image.id})，${size}${pixel}${scale}${local}`;
 }
 
 function renderRestorationPageLine(
@@ -194,4 +231,52 @@ function renderRecommendedOrder(context: DesignContext): string {
 
 function renderFlow(flow: DesignContext["restoration"]["implementationGuide"]["pageFlows"][number]): string {
   return `- ${flow.summary} 置信度：${flow.confidence}。页面 ID：${flow.orderedPageIds.join(" -> ")}`;
+}
+
+function buildContextSchema(): ContextSchemaInfo {
+  return {
+    schemaVersion: "1.1.1",
+    capabilities: {
+      hasRestorationContext: true,
+      supportsTargetImageFocus: true,
+      supportsTargetDescription: true,
+      supportsTargetRegion: true,
+      includesImageDimensions: true,
+      includesBusinessImplementationGuide: true,
+      requiresMcpRestartAfterBuild: true
+    },
+    restartHint: "MCP 服务是长进程；更新代码、build 或修改环境变量后，请重启 Codex/MCP 再验收 context schema。"
+  };
+}
+
+function renderCapabilities(schema: ContextSchemaInfo): string {
+  return Object.entries(schema.capabilities)
+    .filter(([, enabled]) => enabled)
+    .map(([name]) => name)
+    .join(", ");
+}
+
+function renderTargetFocus(context: DesignContext): string {
+  const focus = context.restoration.targetFocus;
+  const lines = [
+    `- 目标来源：${focus.source}`,
+    `- 选中画板：${focus.selectedImageName ? `${focus.selectedImageName} (${focus.selectedImageId ?? "未知 ID"})` : "未匹配"}`,
+    `- 页面角色：${focus.selectedPageRole ?? "未知"}`
+  ];
+
+  if (focus.component?.description) {
+    lines.push(`- 组件描述：${focus.component.description}`);
+  }
+  if (focus.component?.region) {
+    const region = focus.component.region;
+    lines.push(`- 组件区域：x=${region.x}, y=${region.y}, width=${region.width}, height=${region.height}, coordinateSpace=${region.coordinateSpace ?? "unknown"}`);
+  }
+  if (focus.component?.instruction) {
+    lines.push(`- 组件实现提示：${focus.component.instruction}`);
+  }
+  if (focus.warnings.length > 0) {
+    lines.push(...focus.warnings.map((warning) => `- 聚焦 warning：${warning}`));
+  }
+
+  return lines.join("\n");
 }

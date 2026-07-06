@@ -56,7 +56,17 @@ args = ["-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "$coo
 
 - `lanhu_parse_url`：解析蓝湖链接。
 - `lanhu_list_project_images`：读取项目画板列表，不落盘。
-- `lanhu_get_design_context`：生成本地上下文与缩略图资源。
+- `lanhu_get_design_context`：生成本地上下文与缩略图资源，支持目标画板和组件级还原聚焦。
+
+`lanhu_get_design_context` 常用参数：
+
+- `url`：蓝湖项目、画板或详情链接。
+- `includeImages`：是否下载缩略图，默认 `true`。
+- `targetImageId` / `targetImageName`：显式指定要还原的目标画板。
+- `targetDescription`：描述只需要实现的局部组件。
+- `targetRegion`：描述局部组件区域，包含 `x/y/width/height/coordinateSpace`。
+
+生成的 context 会包含 `schema.schemaVersion`、`restoration.targetFocus`、本地图片真实像素尺寸、API 到像素倍率和业务落地检查清单。更新代码并重新 `npm run build` 后，需要重启 Codex/MCP 才能让长进程读取最新构建。
 
 默认产物目录：
 
